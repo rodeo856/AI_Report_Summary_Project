@@ -1,0 +1,4 @@
+openpyxl>=3.1,<4
+Pillow>=10,<12
+# Drag & Drop 구현에 tkinterdnd2를 사용 중인 경우 주석을 해제하십시오.
+# tkinterdnd2>=0.4,<1
