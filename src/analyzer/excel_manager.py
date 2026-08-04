@@ -10,18 +10,24 @@ from pathlib import Path
 
 def make_unique_status_path(file_path: str) -> str:
     src = Path(file_path)
-    base = src.with_name(src.stem + "_Status.xlsx")
+
+    base = src.with_name(f"{src.stem}_Sumary.xlsx")
 
     if not base.exists():
         return str(base)
 
     idx = 1
+
     while True:
-        candidate = src.with_name(f"{src.stem}_Status_{idx:03d}.xlsx")
+        candidate = src.with_name(
+            f"{src.stem}_Sumary_{idx:03d}.xlsx"
+        )
+
         if not candidate.exists():
             return str(candidate)
-        idx += 1
 
+        idx += 1
+        
 class ExcelManager:
     def __init__(self, log_func=None, options: AnalyzeOptions | None = None):
         self.log = log_func or (lambda msg: None)
@@ -88,21 +94,69 @@ class ExcelManager:
             generator.generate(self.workbook, results)
             self.log("[ExcelManager] Sheet 생성 완료")
 
+            # 저장 직전 Workbook과 시트 상태 확인
+            sheet_names_before_save = [
+                self.workbook.Worksheets.Item(i).Name
+                for i in range(1, self.workbook.Worksheets.Count + 1)
+            ]
+            
+            self.log(f"[ExcelManager] 저장 대상 경로: {self.workbook.FullName}")
+            self.log(
+                f"[ExcelManager] 저장 직전 시트 목록: "
+                f"{sheet_names_before_save}"
+            )
+            self.log(
+                f"[ExcelManager] 저장 직전 Status 존재: "
+                f"{'Status' in sheet_names_before_save}"
+            )
+            
+            if "Status" not in sheet_names_before_save:
+                raise RuntimeError(
+                    "저장 직전에 Status 시트를 찾을 수 없습니다."
+                )
+            
             self.log("[ExcelManager] Workbook 저장 시작")
-
+            
             self.excel.DisplayAlerts = False
             self.workbook.Save()
-            self.workbook.Saved = True
-
+            
+            # 저장 직후에도 Workbook 내부 상태 확인
+            sheet_names_after_save = [
+                self.workbook.Worksheets.Item(i).Name
+                for i in range(1, self.workbook.Worksheets.Count + 1)
+            ]
+            
+            self.log(
+                f"[ExcelManager] 저장 직후 시트 목록: "
+                f"{sheet_names_after_save}"
+            )
+            self.log(
+                f"[ExcelManager] 저장 직후 Status 존재: "
+                f"{'Status' in sheet_names_after_save}"
+            )
+            
+            if "Status" not in sheet_names_after_save:
+                raise RuntimeError(
+                    "저장 직후 Status 시트를 찾을 수 없습니다."
+                )
+            
             self.log("[ExcelManager] Workbook 저장 완료")
 
         finally:
             self.log("[ExcelManager] 종료 처리 시작")
-            if self.workbook is not None:
-                self.log("[ExcelManager] Workbook 닫기")
-                self.workbook.Saved = True
-                self.workbook.Close(SaveChanges=False)
-                self.workbook = None
+    if self.workbook is not None:
+        self.log("[ExcelManager] Workbook 닫기")
+    
+        try:
+            self.workbook.Close(SaveChanges=True)
+        except Exception as close_error:
+            self.log(
+                f"[ExcelManager] Workbook 닫기 실패: "
+                f"{close_error}"
+            )
+            raise
+    finally:
+        self.workbook = None
             if self.excel is not None:
                 self.log("[ExcelManager] Excel 종료")
                 self.excel.Quit()
