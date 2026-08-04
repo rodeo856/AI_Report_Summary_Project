@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.log
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+~$*.xlsx
+*_Summary.xlsx
+*_Summary_*.xlsx
+dist/
+build/
+*.spec

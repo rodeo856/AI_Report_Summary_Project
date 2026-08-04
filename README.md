@@ -1,45 +1,53 @@
 # AI Report Summary Project
 
-AER(실장 검토) Excel 레포트를 분석하여 테스트 진행 현황과 Summary 시트를 자동 생성하기 위한 Python 프로젝트입니다.
+AER Excel 테스트 레포트를 분석하여 Summary 시트를 자동 생성하는 Python 프로젝트입니다.
 
-## 현재 저장소 상태
+> 저장소는 회사 업무 자료와 샘플 레포트를 포함할 수 있으므로 **Private Repository**로 유지하세요.
 
-이 패키지는 **GitHub 이관용 기준 저장소**입니다. 프로젝트 규칙, 샘플 Excel, 인수인계 문서와 협업 템플릿은 포함되어 있으나, 현재 대화에 최신 Python 소스가 제공되지 않아 `src/`에는 소스 투입 위치만 준비되어 있습니다.
+## 현재 상태
 
-> 최신 `summary_generator.py` 및 관련 Python 파일을 `src/`에 추가한 뒤 첫 번째 기준 태그를 생성하십시오.
+- GitHub 표준 폴더 구조 구성 완료
+- 프로젝트 명세와 인수인계 자료 포함
+- 샘플 AER Excel 포함
+- 최신 Python 소스는 아직 미포함
+- 실제 사용 중인 `summary_generator.py` 및 관련 소스를 `src/`에 추가해야 함
 
-## 핵심 목표
+## 주요 기능
 
-- Waveform 및 테이블 데이터를 이용한 테스트 진행률 계산
-- Summary 시트를 원본 Workbook의 마지막에 생성
-- 전체/시트별 Daily Progress 집계
-- 파일명은 있으나 Embedded Image가 없는 항목 검출
-- 기존 병합 셀, 스타일과 레포트 구조 보존
-- Drag & Drop, 진행률 표시, 단계별 로그 제공
+- 대상 시트 자동 인식
+- Major / Middle / Minor 계층 파싱
+- Waveform O/X 및 파일 현황 집계
+- 테스트 진행률 계산
+- Daily Progress 생성
+- Missing Image 검출
+- Summary 시트 생성 및 스타일 적용
+- 중복되지 않는 출력 파일명 생성
 
-## 빠른 시작
+## 저장소 구조
 
-1. `docs/PROJECT_CONTEXT.md`를 읽습니다.
-2. `docs/specs/REQUIREMENTS.md`와 `docs/specs/ALGORITHM_SPEC.md`를 확인합니다.
-3. 최신 Python 소스를 `src/`에 넣습니다.
-4. 원본 샘플은 `samples/`에서 확인합니다.
-5. 코드 변경 전 `tests/REGRESSION_CHECKLIST.md`를 기준으로 영향 범위를 검토합니다.
+```text
+.github/        GitHub Issue, PR, Actions 설정
+config/         설정 파일
+docs/           프로젝트 문서와 명세
+knowledge_base/ 확정 규칙과 설계 결정
+prompts/        ChatGPT 작업 프롬프트
+release/        배포 파일 및 릴리스 노트
+samples/        입력/출력 샘플
+src/            실제 Python 소스
+tests/          테스트 및 회귀 검증
+tools/          개발/점검 보조 도구
+```
 
-## 대상 시트명 규칙
+## 가장 먼저 할 일
 
-`<Operation Mode>_<Input><Ratio>`
+1. 실제 사용 중인 최신 Python 파일을 `src/`에 업로드합니다.
+2. `src/SOURCE_REQUIRED.md`를 확인합니다.
+3. 샘플 Excel로 실행 결과를 검증합니다.
+4. 검증 완료 후 `v0.1.0-baseline` 태그를 생성합니다.
 
-- Operation Mode: `RVS`, `FWD`
-- Input: `V` = VBUS, `W` = WPC
-- Ratio: `1`~`4`
-- 예: `RVS_V4`, `FWD_W2`
+## 새 ChatGPT 계정에서 시작하는 방법
 
-## 브랜치 운영
-
-- `main`: 검증 완료된 배포 기준
-- `develop`: 통합 개발
-- `feature/<topic>`: 기능 단위 개발
-- `fix/<issue>`: 버그 수정
-- `docs/<topic>`: 문서 변경
-
-자세한 방식은 `CONTRIBUTING.md`를 참고하십시오.
+1. 이 저장소의 `README.md`를 읽게 합니다.
+2. `knowledge_base/PROJECT_DNA.md`와 `prompts/NEW_CHATGPT_ACCOUNT_PROMPT.md`를 제공합니다.
+3. 수정할 최신 소스 파일을 함께 제공합니다.
+4. 기존 기능을 유지하는 최소 수정 방식으로 작업합니다.
