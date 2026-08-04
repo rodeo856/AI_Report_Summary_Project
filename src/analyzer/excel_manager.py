@@ -144,23 +144,33 @@ class ExcelManager:
 
         finally:
             self.log("[ExcelManager] 종료 처리 시작")
-    if self.workbook is not None:
-        self.log("[ExcelManager] Workbook 닫기")
-    
-        try:
-            self.workbook.Close(SaveChanges=True)
-        except Exception as close_error:
-            self.log(
-                f"[ExcelManager] Workbook 닫기 실패: "
-                f"{close_error}"
-            )
-            raise
-    finally:
-        self.workbook = None
+
+            if self.workbook is not None:
+                self.log("[ExcelManager] Workbook 닫기")
+
+                try:
+                    self.workbook.Close(SaveChanges=True)
+                except Exception as close_error:
+                    self.log(
+                        f"[ExcelManager] Workbook 닫기 실패: "
+                        f"{close_error}"
+                    )
+                finally:
+                    self.workbook = None
+
             if self.excel is not None:
                 self.log("[ExcelManager] Excel 종료")
-                self.excel.Quit()
-                self.excel = None
+
+                try:
+                    self.excel.Quit()
+                except Exception as quit_error:
+                    self.log(
+                        f"[ExcelManager] Excel 종료 실패: "
+                        f"{quit_error}"
+                    )
+                finally:
+                    self.excel = None
+
             pythoncom.CoUninitialize()
             self.log("[ExcelManager] COM 해제 완료")
 
