@@ -1,11 +1,78 @@
 from collections import defaultdict
 import json
-from pathlib import path
+from pathlib import Path
+
+def load_config() -> dict:
+    """
+    프로젝트 루트의 config/default.json을 읽는다.
+ 
+    예상 구조:
+    AI_Report_Summary_Project/
+    ├── config/
+    │   └── default.json
+    └── src/
+        └── summary_generator.py
+    """
+ 
+    project_root = Path(__file__).resolve().parent.parent
+    config_path = project_root / "config" / "default.json"
+ 
+    if not config_path.exists():
+        raise FileNotFoundError(
+            "설정 파일을 찾을 수 없습니다.\n"
+            f"확인 경로: {config_path}"
+        )
+ 
+    try:
+        with config_path.open("r", encoding="utf-8-sig") as file:
+            config = json.load(file)
+ 
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "default.json 형식이 올바르지 않습니다.\n"
+            f"파일: {config_path}\n"
+            f"오류 위치: line {error.lineno}, column {error.colno}\n"
+            f"오류 내용: {error.msg}"
+        ) from error
+ 
+    required_keys = ("input_root", "output_root")
+ 
+    for key in required_keys:
+        value = config.get(key)
+ 
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                f"default.json의 '{key}' 값이 없거나 올바르지 않습니다."
+            )
+ 
+    return config
 
 class SummaryGenerator:
     def __init__(self, log_func=None, options=None):
         self.log = log_func or (lambda msg: None)
-        self.options = options
+        self.options = options or {}
+     
+        config = load_config()
+     
+        self.input_root = Path(config["input_root"]).expanduser()
+        self.output_root = Path(config["output_root"]).expanduser()
+     
+        if not self.input_root.exists():
+            raise FileNotFoundError(
+                "입력 폴더를 찾을 수 없습니다.\n"
+                f"확인 경로: {self.input_root}"
+            )
+     
+        if not self.input_root.is_dir():
+            raise NotADirectoryError(
+                "input_root가 폴더가 아닙니다.\n"
+                f"확인 경로: {self.input_root}"
+            )
+     
+    self.output_root.mkdir(parents=True, exist_ok=True)
+ 
+    self.log(f"[SummaryGenerator] Input Root: {self.input_root}")
+    self.log(f"[SummaryGenerator] Output Root: {self.output_root}")
 
     def generate(self, workbook, results):
         self.log("[SummaryGenerator] Status Sheet 생성 진입")
