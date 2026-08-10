@@ -3,9 +3,9 @@ import pythoncom
 import win32com.client as win32
 import shutil
 
-from analyzer.options import AnalyzeOptions
-from analyzer.report_parser import ReportParser
-from analyzer.summary_generator import SummaryGenerator
+from src.analyzer.options import AnalyzeOptions
+from src.analyzer.report_parser import ReportParser
+from src.analyzer.summary_generator import SummaryGenerator
 from pathlib import Path
 
 def make_unique_status_path(file_path: str) -> str:

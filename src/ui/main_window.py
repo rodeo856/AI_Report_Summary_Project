@@ -7,8 +7,8 @@ from PySide6.QtCore import QFile, Qt
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QApplication
 
-from analyzer.excel_manager import ExcelManager
-from analyzer.options import AnalyzeOptions
+from src.analyzer.excel_manager import ExcelManager
+from src.analyzer.options import AnalyzeOptions
 
 
 class DropAreaEventFilter:

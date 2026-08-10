@@ -1,5 +1,5 @@
 import re
-from analyzer.waveform_parser import WaveformParser
+from src.analyzer.waveform_parser import WaveformParser
 
 
 TARGET_SHEET_RE = re.compile(r"^(RVS|FWD)_[VW][1-4]$")

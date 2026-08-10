@@ -14,7 +14,7 @@ def load_config() -> dict:
         └── summary_generator.py
     """
  
-    project_root = Path(__file__).resolve().parent.parent
+    project_root = Path(__file__).resolve().parent.parent.parent
     config_path = project_root / "config" / "default.json"
  
     if not config_path.exists():
@@ -69,10 +69,10 @@ class SummaryGenerator:
                 f"확인 경로: {self.input_root}"
             )
      
-    self.output_root.mkdir(parents=True, exist_ok=True)
- 
-    self.log(f"[SummaryGenerator] Input Root: {self.input_root}")
-    self.log(f"[SummaryGenerator] Output Root: {self.output_root}")
+        self.output_root.mkdir(parents=True, exist_ok=True)
+    
+        self.log(f"[SummaryGenerator] Input Root: {self.input_root}")
+        self.log(f"[SummaryGenerator] Output Root: {self.output_root}")
 
     def generate(self, workbook, results):
         self.log("[SummaryGenerator] Status Sheet 생성 진입")
