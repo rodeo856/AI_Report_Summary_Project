@@ -15,6 +15,8 @@ def load_config() -> dict:
     """
  
     project_root = Path(__file__).resolve().parent.parent.parent
+    print(f"[DEBUG] summary_generator 파일 위치 = {Path(__file__).resolve()}", flush=True)
+    print(f"[DEBUG] config 경로 = {project_root / 'config' / 'default.json'}", flush=True)
     config_path = project_root / "config" / "default.json"
  
     if not config_path.exists():
@@ -79,11 +81,39 @@ class SummaryGenerator:
 
         self.delete_existing_summary(workbook)
 
-        ws = workbook.Worksheets.Add(After=workbook.Worksheets(workbook.Worksheets.Count))
+        # 반드시 현재 작업 중인 Workbook을 활성화
+        workbook.Activate()
+
+        # 마지막 기존 시트를 명확하게 지정
+        last_ws = workbook.Worksheets.Item(workbook.Worksheets.Count)
+        last_ws.Activate()
+
+        # 현재 Workbook의 마지막 위치에 Status 추가
+        ws = workbook.Worksheets.Add(
+            After=last_ws
+        )
+
         ws.Name = "Status"
         ws.Activate()
 
+        # 생성된 시트가 실제 대상 Workbook 소속인지 확인
+        self.log(
+            f"[SummaryGenerator] 대상 Workbook: "
+            f"{workbook.Name}"
+        )
+        self.log(
+            f"[SummaryGenerator] 생성 시트 Parent: "
+            f"{ws.Parent.Name}"
+        )
+
+        if ws.Parent.Name != workbook.Name:
+            raise RuntimeError(
+                "Status 시트가 대상 Workbook이 아닌 "
+                "다른 Workbook에 생성되었습니다."
+            )
+
         row = 1
+
         row = self.write_overall_summary(ws, row, results)
         row += 2
 
@@ -98,7 +128,9 @@ class SummaryGenerator:
         self.merge_same_values_in_pass_fail(ws)
         self.apply_format(ws)
         self.format_pass_fail_text(ws)
-        self.move_status_to_end(workbook)
+
+        # Status는 처음부터 마지막 위치에 생성했으므로
+        # move_status_to_end()를 다시 호출하지 않음.
 
         self.log("[SummaryGenerator] Status Sheet 생성 완료")
 
