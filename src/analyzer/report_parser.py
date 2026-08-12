@@ -1,5 +1,6 @@
 import re
 from src.analyzer.waveform_parser import WaveformParser
+from src.analyzer.image_time_resolver import ImageTimeResolver
 
 
 TARGET_SHEET_RE = re.compile(r"^(RVS|FWD)_[VW][1-4]$")
@@ -9,6 +10,7 @@ class ReportParser:
     def __init__(self, log_func=None):
         self.log = log_func or (lambda msg: None)
         self.waveform_parser = WaveformParser()
+        self.image_time_resolver = ImageTimeResolver(self.log)
 
     def parse_workbook(self, workbook):
         results = []
@@ -102,11 +104,16 @@ class ReportParser:
                 "waveform_required_count": analyzed.get("waveform_required_count", 0),
                 "waveform_done_count": analyzed.get("waveform_done_count", 0),
                 "waveform_missing_count": analyzed.get("waveform_missing_count", 0),
-                "image_shape_count": analyzed.get("image_shape_count", 0),
+                "image_shape_count": analyzed.get("image_shape_count",0,),
+                "image_link_count": analyzed.get("image_link_count",0,),
+                "image_link_paths": analyzed.get("image_link_paths",[],),
+                "image_root_match_count": analyzed.get("image_root_match_count",0,),
+                "image_metadata_time_list": analyzed.get("image_metadata_time_list",[],),
+                "image_metadata_records": analyzed.get("image_metadata_records",[],),
+                "latest_image_metadata_time": analyzed.get("latest_image_metadata_time","",),
                 "progress_state": analyzed.get("progress_state", ""),
                 "waveform_progress_rate": analyzed.get("waveform_progress_rate", ""),
-            })
-
+                })
         return results
 
     def find_category_rows(self, values, used_start_row):
@@ -218,12 +225,22 @@ class ReportParser:
                     if dt:
                         waveform_times.append(dt)
 
-        image_shape_count = self.count_image_shapes_in_section(
-            ws,
-            start_row,
-            end_row,
+        image_time_info = self.image_time_resolver.inspect_section(
+            ws=ws,
+            start_row=start_row,
+            end_row=end_row,
+            waveform_files=waveform_files,
             )
 
+        image_shape_count = image_time_info["image_shape_count"]
+
+        image_metadata_times = image_time_info["metadata_time_list"]
+
+        latest_image_metadata_time = (
+            max(image_metadata_times)
+            if image_metadata_times
+            else ""
+        )
         waveform_total_slot_count = waveform_o_count
 
         waveform_excluded_count = 0
@@ -313,6 +330,24 @@ class ReportParser:
             "waveform_done_count": waveform_done_count,
             "waveform_missing_count": waveform_missing_count,
             "image_shape_count": image_shape_count,
+            "image_link_count": image_time_info["linked_picture_count"],
+            "image_link_paths": image_time_info["linked_paths"],
+
+            "image_root_match_count": (
+                image_time_info["image_root_match_count"]
+            ),
+
+            "image_metadata_time_list": (
+                image_time_info["metadata_time_list"]
+            ),
+
+            "image_metadata_records": (
+                image_time_info["metadata_records"]
+            ),
+
+            "latest_image_metadata_time": (
+                latest_image_metadata_time
+            ),
             "progress_state": progress_state,
             "waveform_progress_rate":
                 waveform_done_count / waveform_required_count
